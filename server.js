@@ -12,8 +12,8 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 const PORT = process.env.PORT || 5000;
 
-// Atlas SRV Connection String with password 'Abd12345'
-const uri = "mongodb+srv://aslamabdullah288_db_user:Abd12345@abdullah.2zmjnx6.mongodb.net/?appName=Abdullah";
+// Standard/Direct connection string use kar rahe hain taake DNS SRV query ka error na aaye
+const uri = "mongodb://aslamabdullah288_db_user:Abd12345@abdullah-shard-00-00.2zmjnx6.mongodb.net:27017,abdullah-shard-00-01.2zmjnx6.mongodb.net:27017,abdullah-shard-00-02.2zmjnx6.mongodb.net:27017/?ssl=true&replicaSet=atlas-2zmjnx6-shard-0&authSource=admin&retryWrites=true&w=majority&appName=Abdullah";
 
 const client = new MongoClient(uri, {
   serverApi: {
@@ -28,10 +28,8 @@ async function run() {
     await client.connect();
     console.log("MongoDB connected successfully via Native Driver!");
     
-    // Database instance ko app mein attach kar dein taake routes access kar sakein
-    app.locals.db = client.db('my-custom-app'); // Yahan apne database ka naam likh dein
+    app.locals.db = client.db('my-custom-app');
 
-    // Routes (Database connect hone ke BAAD load honge)
     const authRoutes = require('./routes/auth');
     const customerAuthRoutes = require('./routes/customerAuth');
     const productRoutes = require('./routes/products');
