@@ -28,10 +28,17 @@ app.get('/', (req, res) => res.send('Ecommerce API is running'));
 
 const PORT = process.env.PORT || 5000;
 
+// Fallback check taake agar MONGO_URI na mile toh local connection ki bajaye error saaf nazar aaye
+const MONGO_URI = process.env.MONGO_URI;
+
+if (!MONGO_URI) {
+  console.error('CRITICAL ERROR: MONGO_URI environment variable is not defined!');
+}
+
 mongoose
-  .connect(process.env.MONGO_URI)
+  .connect(MONGO_URI)
   .then(() => {
-    console.log('MongoDB connected');
+    console.log('MongoDB connected successfully');
     app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
   })
   .catch((err) => console.error('MongoDB connection error:', err.message));
