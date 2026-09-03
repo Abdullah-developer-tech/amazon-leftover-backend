@@ -10,23 +10,6 @@ app.use(cors({ origin: process.env.CLIENT_URL || '*' }));
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Routes
-const authRoutes = require('./routes/auth');
-const customerAuthRoutes = require('./routes/customerAuth');
-const productRoutes = require('./routes/products');
-const orderRoutes = require('./routes/orders');
-const reviewRoutes = require('./routes/reviews');
-const settingsRoutes = require('./routes/settings');
-
-app.use('/api/auth', authRoutes);
-app.use('/api/customers', customerAuthRoutes);
-app.use('/api/products', productRoutes);
-app.use('/api/orders', orderRoutes);
-app.use('/api/reviews', reviewRoutes);
-app.use('/api/settings', settingsRoutes);
-
-app.get('/', (req, res) => res.send('Ecommerce API is running'));
-
 const PORT = process.env.PORT || 5000;
 
 // Atlas SRV Connection String with password 'Abd12345'
@@ -45,6 +28,26 @@ async function run() {
     await client.connect();
     console.log("MongoDB connected successfully via Native Driver!");
     
+    // Database instance ko app mein attach kar dein taake routes access kar sakein
+    app.locals.db = client.db('my-custom-app'); // Yahan apne database ka naam likh dein
+
+    // Routes (Database connect hone ke BAAD load honge)
+    const authRoutes = require('./routes/auth');
+    const customerAuthRoutes = require('./routes/customerAuth');
+    const productRoutes = require('./routes/products');
+    const orderRoutes = require('./routes/orders');
+    const reviewRoutes = require('./routes/reviews');
+    const settingsRoutes = require('./routes/settings');
+
+    app.use('/api/auth', authRoutes);
+    app.use('/api/customers', customerAuthRoutes);
+    app.use('/api/products', productRoutes);
+    app.use('/api/orders', orderRoutes);
+    app.use('/api/reviews', reviewRoutes);
+    app.use('/api/settings', settingsRoutes);
+
+    app.get('/', (req, res) => res.send('Ecommerce API is running'));
+
     app.listen(PORT, '0.0.0.0', () => {
       console.log(`Server running on port ${PORT}`);
     });
