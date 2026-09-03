@@ -12,8 +12,8 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 const PORT = process.env.PORT || 5000;
 
-// Standard/Direct connection string use kar rahe hain taake DNS SRV query ka error na aaye
-const uri = "mongodb://aslamabdullah288_db_user:Abd12345@abdullah-shard-00-00.2zmjnx6.mongodb.net:27017,abdullah-shard-00-01.2zmjnx6.mongodb.net:27017,abdullah-shard-00-02.2zmjnx6.mongodb.net:27017/?ssl=true&replicaSet=atlas-2zmjnx6-shard-0&authSource=admin&retryWrites=true&w=majority&appName=Abdullah";
+// SRV Connection String
+const uri = "mongodb+srv://aslamabdullah288_db_user:Abd12345@abdullah.2zmjnx6.mongodb.net/?retryWrites=true&w=majority&appName=Abdullah";
 
 const client = new MongoClient(uri, {
   serverApi: {
