@@ -29,7 +29,7 @@ app.get('/', (req, res) => res.send('Ecommerce API is running'));
 const PORT = process.env.PORT || 5000;
 
 // Fallback check taake agar MONGO_URI na mile toh local connection ki bajaye error saaf nazar aaye
-const MONGO_URI = process.env.MONGO_URI;
+const MONGO_URL = process.env.MONGO_URL;
 
 if (!MONGO_URI) {
   console.error('CRITICAL ERROR: MONGO_URI environment variable is not defined!');
