@@ -8,8 +8,8 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// MongoDB Direct Connection with 'ecommerce' database name
-const MONGO_URI = "mongodb+srv://aslamabdullah288_db_user:Abd12345@abdullah.2zmjnx6.mongodb.net/ecommerce?retryWrites=true&w=majority&appName=Abdullah";
+// MongoDB Connection (Yeh automatically .env ya Vercel Environment Variables se URI uthaye ga)
+const MONGO_URI = process.env.MONGO_URI;
 
 mongoose.connect(MONGO_URI)
   .then(() => console.log("MongoDB Connected Successfully!"))
@@ -23,11 +23,12 @@ const adminSchema = new mongoose.Schema({
 });
 const Admin = mongoose.models.Admin || mongoose.model('Admin', adminSchema);
 
+// Root Route
 app.get('/', (req, res) => {
-  res.send('Amazon Leftover Backend is running successfully on Vercel!');
+  res.send('Amazon Leftover Backend is running successfully!');
 });
 
-// Settings API Route (Fixes the 404 Theme Load Error)
+// Settings API Route (Fixes Theme/404 Error)
 app.get('/api/settings', (req, res) => {
   res.json({
     success: true,
