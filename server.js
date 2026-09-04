@@ -8,8 +8,10 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// MongoDB Direct Connection (Database name 'ecommerce' added)
-mongoose.connect("mongodb+srv://aslamabdullah288_db_user:Abd12345@abdullah.2zmjnx6.mongodb.net/ecommerce?retryWrites=true&w=majority&appName=Abdullah")
+// MongoDB Direct Connection with 'ecommerce' database name
+const MONGO_URI = "mongodb+srv://aslamabdullah288_db_user:Abd12345@abdullah.2zmjnx6.mongodb.net/ecommerce?retryWrites=true&w=majority&appName=Abdullah";
+
+mongoose.connect(MONGO_URI)
   .then(() => console.log("MongoDB Connected Successfully!"))
   .catch((err) => console.log("MongoDB connection error:", err));
 
@@ -25,11 +27,17 @@ app.get('/', (req, res) => {
   res.send('Amazon Leftover Backend is running successfully on Vercel!');
 });
 
-// Admin Login API Route (Supports both email or username)
+// Admin Login API Route (Supports email/username and both plain or hashed passwords)
 app.post('/api/admin/login', async (req, res) => {
   try {
+    console.log("Incoming Login Body:", req.body); // Terminal ya Vercel logs mein check karne ke liye
+
     const { email, username, password } = req.body;
     const loginIdentifier = email || username;
+
+    if (!loginIdentifier || !password) {
+      return res.status(400).json({ success: false, message: "Email and password are required!" });
+    }
 
     const admin = await Admin.findOne({ 
       $or: [{ email: loginIdentifier }, { username: loginIdentifier }] 
@@ -39,16 +47,23 @@ app.post('/api/admin/login', async (req, res) => {
       return res.status(400).json({ success: false, message: "Admin not found in database!" });
     }
 
-    const isMatch = await bcrypt.compare(password, admin.password);
+    // Yeh dono check karega: chahe password plain text ho ya bcrypt hashed!
+    const isMatch = (password === admin.password) || (await bcrypt.compare(password, admin.password));
+    
     if (!isMatch) {
       return res.status(400).json({ success: false, message: "Invalid password!" });
     }
 
-    res.json({ success: true, message: "Login successful!", admin: { email: admin.email, name: admin.name } });
+    res.json({ 
+      success: true, 
+      message: "Login successful!", 
+      admin: { email: admin.email, name: admin.name } 
+    });
   } catch (err) {
+    console.error("Login Error:", err);
     res.status(500).json({ success: false, error: err.message });
   }
 });
 
-// Vercel ke liye app.listen nahi likhte, balkay app ko export karte hain:
+// Vercel ke liye export
 module.exports = app;
