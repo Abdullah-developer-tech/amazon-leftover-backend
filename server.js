@@ -27,7 +27,7 @@ app.get('/', (req, res) => {
   res.send('Amazon Leftover Backend is running successfully on Vercel!');
 });
 
-// Admin Login API Route (Matches frontend URL: /api/auth/login)
+// Admin Login API Route with detailed error catching
 app.post('/api/auth/login', async (req, res) => {
   try {
     console.log("Incoming Login Body:", req.body);
@@ -47,8 +47,13 @@ app.post('/api/auth/login', async (req, res) => {
       return res.status(400).json({ success: false, message: "Admin not found in database!" });
     }
 
-    // Supports both plain text or hashed passwords
-    const isMatch = (password === admin.password) || (await bcrypt.compare(password, admin.password));
+    // Supports both plain text or hashed passwords safely
+    let isMatch = false;
+    if (admin.password.startsWith('$2a$') || admin.password.startsWith('$2b$')) {
+      isMatch = await bcrypt.compare(password, admin.password);
+    } else {
+      isMatch = (password === admin.password);
+    }
     
     if (!isMatch) {
       return res.status(400).json({ success: false, message: "Invalid password!" });
@@ -60,7 +65,7 @@ app.post('/api/auth/login', async (req, res) => {
       admin: { email: admin.email, name: admin.name } 
     });
   } catch (err) {
-    console.error("Login Error:", err);
+    console.error("Login Detailed Error:", err.message);
     res.status(500).json({ success: false, error: err.message });
   }
 });
