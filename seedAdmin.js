@@ -1,28 +1,38 @@
-// Run this once to create your first admin login:  node seedAdmin.js
-require('dotenv').config();
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
-const Admin = require('./models/Admin');
 
-async function run() {
-  await mongoose.connect(process.env.MONGO_URI);
+const MONGO_URL = "mongodb+srv://aslamabdullah288_db_user:Abd12345@abdullah.2zmjnx6.mongodb.net/?retryWrites=true&w=majority&appName=Abdullah";
 
-  const email = process.env.ADMIN_EMAIL;
-  const password = process.env.ADMIN_PASSWORD;
+const adminSchema = new mongoose.Schema({
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  name: { type: String, default: 'Admin' }
+});
+const Admin = mongoose.models.Admin || mongoose.model('Admin', adminSchema);
 
-  const existing = await Admin.findOne({ email });
-  if (existing) {
-    console.log('Admin already exists with this email.');
+async function createAdmin() {
+  try {
+    await mongoose.connect(MONGO_URL);
+    console.log("Connected to MongoDB Atlas for seeding...");
+
+    const email = "aslamabdullah288@gmail.com";
+    const password = "Abd123456789"; // Yeh aapka login password hoga
+
+    const existingAdmin = await Admin.findOne({ email });
+    if (existingAdmin) {
+      console.log('Admin already exists with this email.');
+      process.exit(0);
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    await Admin.create({ email, password: hashedPassword, name: 'Admin' });
+
+    console.log(`Successfully created Admin! Email: ${email}, Password: ${password}`);
     process.exit(0);
+  } catch (err) {
+    console.error("Error creating admin:", err);
+    process.exit(1);
   }
-
-  const hashed = await bcrypt.hash(password, 10);
-  await Admin.create({ email, password: hashed, name: 'Admin' });
-  console.log(`Admin created: ${email}`);
-  process.exit(0);
 }
 
-run().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+createAdmin();
