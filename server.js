@@ -27,7 +27,19 @@ app.get('/', (req, res) => {
   res.send('Amazon Leftover Backend is running successfully on Vercel!');
 });
 
-// Admin Login API Route with detailed error catching
+// Settings API Route (Fixes the 404 Theme Load Error)
+app.get('/api/settings', (req, res) => {
+  res.json({
+    success: true,
+    settings: {
+      siteName: "Amazon Leftover",
+      theme: "light",
+      currency: "PKR"
+    }
+  });
+});
+
+// Admin Login API Route
 app.post('/api/auth/login', async (req, res) => {
   try {
     console.log("Incoming Login Body:", req.body);
@@ -47,7 +59,6 @@ app.post('/api/auth/login', async (req, res) => {
       return res.status(400).json({ success: false, message: "Admin not found in database!" });
     }
 
-    // Supports both plain text or hashed passwords safely
     let isMatch = false;
     if (admin.password.startsWith('$2a$') || admin.password.startsWith('$2b$')) {
       isMatch = await bcrypt.compare(password, admin.password);
