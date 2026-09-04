@@ -27,10 +27,10 @@ app.get('/', (req, res) => {
   res.send('Amazon Leftover Backend is running successfully on Vercel!');
 });
 
-// Admin Login API Route (Supports email/username and both plain or hashed passwords)
-app.post('/api/admin/login', async (req, res) => {
+// Admin Login API Route (Matches frontend URL: /api/auth/login)
+app.post('/api/auth/login', async (req, res) => {
   try {
-    console.log("Incoming Login Body:", req.body); // Terminal ya Vercel logs mein check karne ke liye
+    console.log("Incoming Login Body:", req.body);
 
     const { email, username, password } = req.body;
     const loginIdentifier = email || username;
@@ -47,7 +47,7 @@ app.post('/api/admin/login', async (req, res) => {
       return res.status(400).json({ success: false, message: "Admin not found in database!" });
     }
 
-    // Yeh dono check karega: chahe password plain text ho ya bcrypt hashed!
+    // Supports both plain text or hashed passwords
     const isMatch = (password === admin.password) || (await bcrypt.compare(password, admin.password));
     
     if (!isMatch) {
